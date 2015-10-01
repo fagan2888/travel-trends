@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+import json
+import requests
+import os
+
 class NYTPull(object):
 
     def __init__(self):
@@ -17,6 +21,18 @@ class NYTPull(object):
                         '&begin_date=', begin_date, \
                         '&end_date=', end_date, '&sort=', sort, \
                         '&page=', page, '&api-key=', key])
+                        
+    def FetchURL(self):
+        URL = URL()
+        r = requests.get(URL)
+        payload = r.json()
+        return payload
+        
+    def SavePull(self):
+        data = FetchURL()
+        
+        
+        
 
 if __name__ == "__main__":
     c = NYTPull()
