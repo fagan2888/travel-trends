@@ -50,7 +50,7 @@ class NYTPull(object):
         
 if __name__ == "__main__":
     c = NYTPull()
-    key = '3b0e8a2c16c2aabe3a3ca8b76ef573fc:1:72949871'
+    key = ''
     url = c.URL(key).format(1)
     print(url)
     c.SavePull(key)
