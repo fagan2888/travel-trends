@@ -8,6 +8,7 @@
 import json
 import requests
 import os
+import time
 
 class NYTPull(object):
 
@@ -36,22 +37,27 @@ class NYTPull(object):
                         '&sort=', sort, '&page=', page, \
                         '&api-key=', key])
                         
-    def FetchURL(self, key):
-        URL = self.URL(key).format(1)
+    def FetchURL(self, key, i):
+        URL = self.URL(key).format(i)
         r = requests.get(URL)
         payload = r.json()
         return payload['response']
         
-    def SavePull(self, key):
-        data = self.FetchURL(key)
+    def SavePull(self, key, i):
+        data = self.FetchURL(key, i)
         content = json.dumps(data)
-        with open('test{}.json'.format(1), 'w') as f:
+        with open('Page{}.json'.format(i), 'w') as f:
             f.write(content)
+        if i == 1: return json.dumps(data['meta']['hits'])
+
+    def Main(self):
+        key = '3b0e8a2c16c2aabe3a3ca8b76ef573fc:1:72949871'
+        x = c.SavePull(key, 1)
+        print('START')
+        time.sleep(10)
+        print(x)
         
 if __name__ == "__main__":
     c = NYTPull()
-    key = ''
-    url = c.URL(key).format(1)
-    print(url)
-    c.SavePull(key)
+    c.Main()
 
