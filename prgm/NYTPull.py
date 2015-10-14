@@ -12,24 +12,30 @@ class NYTPull(object):
     def __init__(self):
         pass
 
+    def MakePath(self, folder, file):
+        origin = os.getcwd().split('\\')
+        source = origin[0:len(origin)-1]
+        source.append(folder)
+        source.append(file)
+        path = '\\'.join(source)
+        return path
+
     def ReplaceString(self, string):
         find = {':':'%3A','"':'%22','(':'%28',')':'%29',' ':'+'}
         for key in find:
             string = string.replace(key, find[key])
         return string
 
-    def FormatCountryList(self, country_list):
-        pass
-
-    def URL(self, country, begin_date, end_date, key):
+    def URL(self, country, begin_date, end_date, page, key):
         base_url = 'http://api.nytimes.com/svc/search/v2/articlesearch'
         resp_format = 'json'
-        fq = self.ReplaceString('glocations:({})'.format(country))
+        q = self.ReplaceString('"{}"'.format(country))
+        fq = self.ReplaceString('section_name:("World" "Travel" "Foreign")')
         sort = 'oldest'
-        if page>100: raise ValueError('Page > 100: Needs to be <=100')
         key = self.ReplaceString(key)
         return ''.join([base_url, '.', resp_format, \
-                        '?fq=', fq, \
+                        '?q=', q, \
+                        '&fq=', fq, \
                         '&begin_date=', begin_date, \
                         '&end_date=', end_date, \
                         '&sort=', sort, '&page=', page, \
@@ -41,19 +47,22 @@ class NYTPull(object):
             payload = r.json()
             return payload['response'] 
         
-    def SavePull(self, data):
+    def SavePull(self, data, page):
         content = json.dumps(data)
-        with open('Page{}.json'.format(i), 'w') as f:
+        path = self.MakePath('fixtures', 'Page{}.json'.format(page))
+        with open(path, 'w') as f:
             f.write(content)
 
     def Main(self):
-        country = ''
-        begin_date = ''
-        end_date = ''
+        country = 'Falkland Islands'
+        begin_date = '20100101'
+        end_date = '20130101'
+        page = str(0)
         key = 'XXXXXXX'
-        url = c.URL(country, begin_date, end_date, key)
-        data = FetchURL(url)
-        c.SavePull(data)
+        url = self.URL(country, begin_date, end_date, page, key)
+        print(url)
+        data = self.FetchURL(url)
+        self.SavePull(data, page)
         
 if __name__ == "__main__":
     c = NYTPull()
