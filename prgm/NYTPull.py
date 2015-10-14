@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-##AND section_name:("World" "Travel" "Foreign")
-
 import json
 import requests
 import os
