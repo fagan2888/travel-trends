@@ -27,23 +27,56 @@ class Tester(object):
                 if country == 'Iran': return 1732
             elif offset > 100: return 897
 
-    def PagePull(self, country):
+    def InitPull(self, country):
         hits = self.Pull(country, self.begin_date, self.end_date, 0)
         #sleep(10)
         max_page = ceil(hits/10)
         if max_page == 1:
             pass
         elif max_page <= 100:
-            for i in range(1, max_page):
-                #sleep(10)
-                self.Pull(country, self.begin_date, self.end_date, i)
+            self.PagePull(country, self.begin_date, self.end_date, max_page)
         elif max_page > 100:
-            pass
             self.AltPagePull(self, max_page)
+
+    def PagePull(self, country, begin_date, end_date, max_page):
+        for i in range(1, max_page):
+            self.Pull(country, begin_date, end_date, i)
+
+    def Dates(self, date_string):
+        year = int(date_string[:4])
+        month = int(date_string[4:6])
+        day = int(date_string[6:])
+        date = datetime.date(year, month, day)
+        return date
+
+    def DateString(self, date):
+        date = str(date).replace('-','')
+        return date
+
+    def AddaDay(self, date_string):
+        date = self.Dates(date_string)
+        date_plus_1 = date + datetime.timedelta(days=1)
+        return self.DateString(date_plus_1)
+        
+    def MidDate(self, begin_date, end_date):
+        begin = self.Dates(begin_date)
+        end = self.Dates(end_date)
+        delta = (end - begin) / 2
+        midpoint = begin + delta
+        return self.DateString(midpoint)
+
+    def AltPagePull(self, country, max_page):
+
+        m1 = self.MidDate(self.begin_date, self.end_date)
+        self.Pull(country, self.begin_date, m1, 0, offset=100)
+        
+        m2 = self.AddaDay(m1)
+        self.Pull(country, m2, self.end_date, 0, offset=100)
+        
 
     def Loop(self):
         for line in self.l:
-            self.PagePull(line)
+            self.InitPull(line)
         
 if __name__ == "__main__":
     c = Tester()
