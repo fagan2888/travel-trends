@@ -39,6 +39,7 @@ class Tester(object):
                 self.Pull(country, self.begin_date, self.end_date, i)
         elif max_page > 100:
             pass
+            self.AltPagePull(self, max_page)
 
     def Loop(self):
         for line in self.l:
