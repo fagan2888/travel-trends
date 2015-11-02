@@ -4,7 +4,7 @@ import datetime
 from os import getcwd
 from time import sleep
 from math import ceil
-from request import get
+from requests import get
 from json import dumps
 
 class NYTPull(object):
@@ -20,7 +20,8 @@ class NYTPull(object):
     def MakePath(self, folder, file):
         origin = getcwd().split('\\')
         source = origin[0:len(origin)-1]
-        source.append(folder).append(file)
+        source.append(folder)
+        source.append(file)
         path = '\\'.join(source)
         return path
 
@@ -77,7 +78,7 @@ class NYTPull(object):
         data = self.FetchURL(url)
         page_num = page + offset
         file = self.NameFile(country, page_num)
-        content = dump(data)
+        content = dumps(data)
         self.Save(content, file)
         if page == 0:
             return data['meta']['hits']
@@ -90,16 +91,70 @@ class NYTPull(object):
                 country = line.strip('\n\r')
                 self.PagePull(country)
 
-    # PagePull
-    def PagePull(self, country):
+    # Pull first page and determine next steps
+    def InitPull(self, country):
         hits = self.Pull(country, self.begin_date, self.end_date, 0)
         sleep(10)
         max_page = ceil(hits/10)
         if max_page == 1:
             pass
         elif max_page <= 100:
-            for i in range(1, max_page):
-                sleep(10)
-                self.Pull(country, self.begin_date, self.end_date, i)
+            self.PagePull(country, self.begin_date, self.end_date, max_page)
         elif max_page > 100:
             self.AltPagePull(country, max_page)
+
+    # Retrieve pages up to 100
+    def PagePull(self, country, begin_date, end_date, max_page):
+        for i in range(1, max_page):
+            self.Pull(country, begin_date, end_date, i)
+
+    # Converts a string date to datetime format
+    def Dates(self, date_string):
+        year = int(date_string[:4])
+        month = int(date_string[4:6])
+        day = int(date_string[6:])
+        date = datetime.date(year, month, day)
+        return date
+
+    # Converts a datetime format to a string
+    def DateString(self, date):
+        date = str(date).replace('-','')
+        return date
+
+    # Adds one day to a string formatted date
+    def AddaDay(self, date_string):
+        date = self.Dates(date_string)
+        date_plus_1 = date + datetime.timedelta(days=1)
+        return self.DateString(date_plus_1)
+
+    #Finds the middle date of any two dates
+    def MidDate(self, begin_date, end_date):
+        begin = self.Dates(begin_date)
+        end = self.Dates(end_date)
+        delta = (end - begin) / 2
+        midpoint = begin + delta
+        return self.DateString(midpoint)
+
+    # Under Construction
+    def AltPagePull(self, country, max_page):
+        m1 = self.MidDate(self.begin_date, self.end_date)
+        new_cnt = self.Pull(country, self.begin_date, m1, 0, offset=100)
+        print(new_cnt)
+        m2 = self.AddaDay(m1)
+        new_cnt = self.Pull(country, m2, self.end_date, 0, offset=200)
+        print(new_cnt)
+
+    # Read country names from file
+    def ReadCountries(self, file):
+        f = ['Iran', 'Russia']
+        for line in f:
+            self.InitPull(line)
+##        path = self.MakePath('fixtures', file)
+##        with open(path) as f:
+##            for line in f:
+##                country = line.strip('\n\r')
+##                self.PullLoop(country, self.begin_date, self.end_date)
+
+if __name__ == "__main__":
+    c = NYTPull('3b0e8a2c16c2aabe3a3ca8b76ef573fc:1:72949871')
+    c.ReadCountries('Countries.txt')

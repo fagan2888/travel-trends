@@ -36,7 +36,7 @@ class Tester(object):
         elif max_page <= 100:
             self.PagePull(country, self.begin_date, self.end_date, max_page)
         elif max_page > 100:
-            self.AltPagePull(self, max_page)
+            self.AltPagePull(country, max_page)
 
     def PagePull(self, country, begin_date, end_date, max_page):
         for i in range(1, max_page):
@@ -68,11 +68,11 @@ class Tester(object):
     def AltPagePull(self, country, max_page):
 
         m1 = self.MidDate(self.begin_date, self.end_date)
-        self.Pull(country, self.begin_date, m1, 0, offset=100)
-        
+        new_cnt = self.Pull(country, self.begin_date, m1, 0, offset=100)
+        print(new_cnt)
         m2 = self.AddaDay(m1)
-        self.Pull(country, m2, self.end_date, 0, offset=100)
-        
+        new_cnt = self.Pull(country, m2, self.end_date, 0, offset=100)
+        print(new_cnt)
 
     def Loop(self):
         for line in self.l:
