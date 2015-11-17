@@ -68,6 +68,7 @@ class NYTPull(object):
 
     # Pulls from API
     def Pull(self, country, begin_date, end_date, page):
+        sleep(10)
         url = self.URL(country, begin_date, end_date, page)
         data = self.FetchURL(url)
         self.SavePull(country, data, page)
@@ -81,16 +82,13 @@ class NYTPull(object):
         if max_page == 1:
             pass
         elif max_page <= 100:
-            sleep(10)
             for i in range(1, max_page):
                 self.Pull(country, begin_date, end_date, i)
-                sleep(10)
         elif max_page > 100:
             path = self.MakePath('fixtures', 'Problems.txt')
             l = [country, str(hits), str(max_page)]
             with open(path, 'w') as f:
                 f.write(','.join(l))
-            sleep(10)
 
     def ReadCountries(self, file):
         path = self.MakePath('fixtures', file)

@@ -14,15 +14,16 @@ class NYTPull(object):
         self.key = key
         self.begin_date = '20100101'
         self.end_date = '20130101'
-        self.country_list = 'countries.txt'
+        self.country_list = 'CountryListNoDups.txt'
+        self.tracker = 0
 
     # Dynamically creates path to fixtures folder
     def MakePath(self, folder, file):
-        origin = getcwd().split('\\')
+        origin = getcwd().split('/')
         source = origin[0:len(origin)-1]
         source.append(folder)
         source.append(file)
-        path = '\\'.join(source)
+        path = '/'.join(source)
         return path
 
     # Replaces certain character values for the URL
@@ -73,13 +74,14 @@ class NYTPull(object):
             print('Saved: {}'.format(file))
 
     # Retrieves file from api
-    def Pull(self, country, begin_date, end_date, page, offset=0):
+    def Pull(self, country, begin_date, end_date, page):
+        sleep(10)
         url = self.URL(country, begin_date, end_date, page)
         data = self.FetchURL(url)
-        page_num = page + offset
-        file = self.NameFile(country, page_num)
+        file = self.NameFile(country, self.tracker)
         content = dumps(data)
         self.Save(content, file)
+        self.tracker = self.tracker + 1
         if page == 0:
             return data['meta']['hits']
 
@@ -92,16 +94,16 @@ class NYTPull(object):
                 self.PagePull(country)
 
     # Pull first page and determine next steps
-    def InitPull(self, country):
-        hits = self.Pull(country, self.begin_date, self.end_date, 0)
-        sleep(10)
-        max_page = ceil(hits/10)
+    def InitPull(self, country, begin_date, end_date):
+        hits = self.Pull(country, begin_date, end_date, 0)
+        if hits == 0: max_page = 1
+        else: max_page = ceil(hits/10)
         if max_page == 1:
             pass
         elif max_page <= 100:
-            self.PagePull(country, self.begin_date, self.end_date, max_page)
+            self.PagePull(country, begin_date, end_date, max_page)
         elif max_page > 100:
-            self.AltPagePull(country, max_page)
+            self.AltPagePull(country, begin_date, end_date)
 
     # Retrieve pages up to 100
     def PagePull(self, country, begin_date, end_date, max_page):
@@ -136,25 +138,30 @@ class NYTPull(object):
         return self.DateString(midpoint)
 
     # Under Construction
-    def AltPagePull(self, country, max_page):
-        m1 = self.MidDate(self.begin_date, self.end_date)
-        new_cnt = self.Pull(country, self.begin_date, m1, 0, offset=100)
-        print(new_cnt)
+    def AltPagePull(self, country, begin_date, end_date):
+        m1 = self.MidDate(begin_date, end_date)
+        self.InitPull(country, begin_date, m1)
         m2 = self.AddaDay(m1)
-        new_cnt = self.Pull(country, m2, self.end_date, 0, offset=200)
-        print(new_cnt)
-
+        self.InitPull(country, m2, end_date)
+        
+    # Read country names into country list
+    def Create_country_list(self):
+        path = self.MakePath('fixtures', self.country_list)
+        with open(path, 'r') as f:
+            x = f.readlines()
+            country_list = []
+            for line in x:
+                line = repr(line).replace(r'\r\n','').replace("'",'').strip().replace(r'\n','')
+                country_list.append(line)
+            return country_list
+    
     # Read country names from file
-    def ReadCountries(self, file):
-        f = ['Iran', 'Russia']
-        for line in f:
-            self.InitPull(line)
-##        path = self.MakePath('fixtures', file)
-##        with open(path) as f:
-##            for line in f:
-##                country = line.strip('\n\r')
-##                self.PullLoop(country, self.begin_date, self.end_date)
+    def ReadCountries(self):
+        country_list = self.Create_country_list()
+        for line in country_list:
+            self.tracker = 0
+            self.InitPull(line, self.begin_date, self.end_date)
 
 if __name__ == "__main__":
     c = NYTPull('3b0e8a2c16c2aabe3a3ca8b76ef573fc:1:72949871')
-    c.ReadCountries('Countries.txt')
+    c.ReadCountries()

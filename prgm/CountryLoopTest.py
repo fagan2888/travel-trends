@@ -1,83 +1,45 @@
-import datetime
-from os import getcwd
-from time import sleep
-from math import ceil
-from requests import get
-from json import dumps
+
 
 class Tester(object):
 
     def __init__(self):
-        self.begin_date = '20100101'
-        self.end_date = '20130101'
-        self.l = ['Iran', 'Iraq', 'Russia']
-
-    def Pull(self, country, begin_date, end_date, page, offset=0):
-        page_num = page + offset
-        l = [country, str(page_num)]
-        file = ''.join(l)
-        print(file, begin_date, end_date)
-        if page == 0:
-            if offset == 0:
-                if country == 'Iran': return 2575
-                if country == 'Russia': return 1350
-                if country == 'Iraq': return 576
-            elif offset > 0 and offset <= 100:
-                if country == 'Russia': return 656
-                if country == 'Iran': return 1732
-            elif offset > 100: return 897
-
-    def InitPull(self, country):
-        hits = self.Pull(country, self.begin_date, self.end_date, 0)
-        #sleep(10)
-        max_page = ceil(hits/10)
-        if max_page == 1:
-            pass
-        elif max_page <= 100:
-            self.PagePull(country, self.begin_date, self.end_date, max_page)
-        elif max_page > 100:
-            self.AltPagePull(country, max_page)
-
-    def PagePull(self, country, begin_date, end_date, max_page):
-        for i in range(1, max_page):
-            self.Pull(country, begin_date, end_date, i)
-
-    def Dates(self, date_string):
-        year = int(date_string[:4])
-        month = int(date_string[4:6])
-        day = int(date_string[6:])
-        date = datetime.date(year, month, day)
-        return date
-
-    def DateString(self, date):
-        date = str(date).replace('-','')
-        return date
-
-    def AddaDay(self, date_string):
-        date = self.Dates(date_string)
-        date_plus_1 = date + datetime.timedelta(days=1)
-        return self.DateString(date_plus_1)
+        self.path = '/Users/bmharris/Python/travel-trends/fixtures/CountryList.csv'
+    
+    def ReadFile(self):
+        with open(self.path, 'r') as f:
+            x = f.readlines()
+            country_list = []
+            for line in x:
+                line = repr(line).replace(r'\r\n','').replace("'",'').strip()
+                country_list.append(line)
+            return country_list
         
-    def MidDate(self, begin_date, end_date):
-        begin = self.Dates(begin_date)
-        end = self.Dates(end_date)
-        delta = (end - begin) / 2
-        midpoint = begin + delta
-        return self.DateString(midpoint)
-
-    def AltPagePull(self, country, max_page):
-
-        m1 = self.MidDate(self.begin_date, self.end_date)
-        new_cnt = self.Pull(country, self.begin_date, m1, 0, offset=100)
-        print(new_cnt)
-        m2 = self.AddaDay(m1)
-        new_cnt = self.Pull(country, m2, self.end_date, 0, offset=100)
-        print(new_cnt)
-
-    def Loop(self):
-        for line in self.l:
-            self.InitPull(line)
+    def CheckDuplicates(self, string_list):
+        new_list = string_list
+        for line in string_list:
+            l = []
+            for s in new_list:
+                if line == s: pass
+                elif line in s:
+                    l.append(s)
+            if len(l) >= 1:
+                for s in l:
+                    new_list.remove(s)
+            status = str(len(new_list))
+        return new_list
+        
+    def Save(self, data):
+        l = self.path.split('/')
+        new_path = '/'.join(l[:-1]) + '/CountryListNoDups.txt'
+        with open(new_path, 'w') as f:
+            for line in data:
+                f.write(line + '\r\n')
         
 if __name__ == "__main__":
     c = Tester()
-    c.Loop()
+    country_list = c.ReadFile()
+    no_dups_list = c.CheckDuplicates(country_list)
+    c.Save(no_dups_list)
+    l = c.Create_country_list()
+    for line in l:
+        print(line)
