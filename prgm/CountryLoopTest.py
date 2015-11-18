@@ -40,6 +40,3 @@ if __name__ == "__main__":
     country_list = c.ReadFile()
     no_dups_list = c.CheckDuplicates(country_list)
     c.Save(no_dups_list)
-    l = c.Create_country_list()
-    for line in l:
-        print(line)

@@ -13,7 +13,7 @@ class NYTPull(object):
         self.url = 'http://api.nytimes.com/svc/search/v2/articlesearch'
         self.key = key
         self.begin_date = '20100101'
-        self.end_date = '20130101'
+        self.end_date = '20140101'
         self.country_list = 'CountryListNoDups.txt'
         self.tracker = 0
 
@@ -65,11 +65,11 @@ class NYTPull(object):
         l = [name, i, '.json']
         file = ''.join(l)
         return file
-        
+
     # Save a file
     def Save(self, content, file):
         path = self.MakePath('fixtures', file)
-        with open(path, 'w') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             f.write(content)
             print('Saved: {}'.format(file))
 
@@ -143,7 +143,7 @@ class NYTPull(object):
         self.InitPull(country, begin_date, m1)
         m2 = self.AddaDay(m1)
         self.InitPull(country, m2, end_date)
-        
+
     # Read country names into country list
     def Create_country_list(self):
         path = self.MakePath('fixtures', self.country_list)
@@ -154,7 +154,7 @@ class NYTPull(object):
                 line = repr(line).replace(r'\r\n','').replace("'",'').strip().replace(r'\n','')
                 country_list.append(line)
             return country_list
-    
+
     # Read country names from file
     def ReadCountries(self):
         country_list = self.Create_country_list()
