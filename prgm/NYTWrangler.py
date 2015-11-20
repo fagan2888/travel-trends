@@ -8,8 +8,11 @@ import sqlite3
 class NYT_Wrangle(object):
 	
 	def __init__(self):
-		self.json_indexer = ['pub_date', 'lead_paragraph', ['headline', 'main'], 'abstract', 'word_count', \
-							 'document_type', '_id']
+		# self.json_indexer = ['pub_date', 'lead_paragraph', ['headline', 'main'], 'abstract', 'word_count', \
+		# 					 'document_type', '_id']
+		self.json_indexer = ['pub_date', 'news_desk', 'lead_paragraph', 'section_name' /
+							 ['headline', 'main'], 'snippet', 'abstract', 'word_count', /
+							 'source', 'document_type', 'type_of_material', '_id']
 	
 	def ListFiles(self, paths):
 		for path in paths:
@@ -33,19 +36,19 @@ class NYT_Wrangle(object):
 			yield i, df
             
 if __name__ == "__main__":
-	# w = NYT_Wrangle()
-	# paths = ['../fixtures/part1', '../fixtures/part2']
-	# list_files = w.ListFiles(paths)
-	# for i, path in enumerate(list_files):
-	# 	print(path)
-	# 	if i == 0:
-	# 		df = w.DeNormalizedDataFrame(path)
-	# 	else:
-	# 		df2 = w.DeNormalizedDataFrame(path)
-	# 		df = df.append(df2, ignore_index=True)
+	w = NYT_Wrangle()
+	paths = ['../fixtures/part1', '../fixtures/part2']
+	list_files = w.ListFiles(paths)
+	for i, path in enumerate(list_files):
+		print(path)
+		if i == 0:
+			df = w.DeNormalizedDataFrame(path)
+		else:
+			df2 = w.DeNormalizedDataFrame(path)
+			df = df.append(df2, ignore_index=True)
 	db_path = '../fixtures/Travel-Trends.db'
 	conn = sqlite3.connect(db_path)
-	# df.to_sql('DeNormalizedNYT', conn, if_exists='replace')
+	df.to_sql('DeNormalizedNYT', conn, if_exists='replace')
 	
 	query00 = "DROP TABLE IF EXISTS country_id;"
 	query01 = """CREATE TABLE country_id as
@@ -75,7 +78,3 @@ if __name__ == "__main__":
 	c.execute(query01)
 	c.execute(query10)
 	c.execute(query11)
-	
-	
-	# .open ../fixtures/travel-trends.db
-	# select * from country_id limit 25;

@@ -36,14 +36,15 @@ class NYTPull(object):
     # Create the url
     def URL(self, country, begin_date, end_date, page):
         resp_format = 'json'
-        q = self.ReplaceString('"{}"'.format(country))
-        fq = self.ReplaceString('section_name:("World" "Travel" "Foreign")')
+        # q = self.ReplaceString('"{}"'.format(country))
+        # fq = self.ReplaceString('section_name:("World" "Travel" "Foreign")')
+        fq = self.ReplaceString('glocations:("{}")'.format(country))
         sort = 'oldest'
         if type(page) == int:
             page = str(page)
         key = self.ReplaceString(self.key)
         url = ''.join([self.url, '.', resp_format, \
-                        '?q=', q, \
+                        # '?q=', q, \
                         '&fq=', fq, \
                         '&begin_date=', begin_date, \
                         '&end_date=', end_date, \
@@ -146,7 +147,7 @@ class NYTPull(object):
 
     # Read country names into country list
     def Create_country_list(self):
-        path = self.MakePath('fixtures', self.country_list)
+        path = self.MakePath('fixtures/RawData', self.country_list)
         with open(path, 'r') as f:
             x = f.readlines()
             country_list = []
