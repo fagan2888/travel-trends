@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from os import getcwd
 from os import listdir
 from json import load
@@ -10,9 +12,10 @@ class NYT_Wrangle(object):
 	def __init__(self):
 		# self.json_indexer = ['pub_date', 'lead_paragraph', ['headline', 'main'], 'abstract', 'word_count', \
 		# 					 'document_type', '_id']
-		self.json_indexer = ['pub_date', 'news_desk', 'lead_paragraph', 'section_name' /
-							 ['headline', 'main'], 'snippet', 'abstract', 'word_count', /
-							 'source', 'document_type', 'type_of_material', '_id']
+		self.json_indexer = ['pub_date', 'news_desk', 'lead_paragraph', 'section_name', \
+							 ['headline', 'main'], 'print_page', 'snippet', 'abstract', \
+							 'word_count', 'source', 'document_type', 'type_of_material', \
+							 '_id']
 	
 	def ListFiles(self, paths):
 		for path in paths:
@@ -52,7 +55,7 @@ if __name__ == "__main__":
 	
 	query00 = "DROP TABLE IF EXISTS country_id;"
 	query01 = """CREATE TABLE country_id as
-					SELECT DISTINCT _id,
+					SELECT DISTINCT _id as article_id,
 						CASE WHEN INSTR(value,"(")>0
 								THEN UPPER(SUBSTR(value, INSTR(value, "(") + 1,
 									INSTR(value, ")") - INSTR(value, "(") - 1))
@@ -64,8 +67,9 @@ if __name__ == "__main__":
 					ORDER BY Country, _id
 				;"""
 	query10 = "DROP TABLE IF EXISTS article_id;"
-	query11 = """CREATE TABLE aritcle_id as
-					SELECT DISTINCT _id, "headline.main", abstract, lead_paragraph,
+	query11 = """CREATE TABLE article_id as
+					SELECT DISTINCT _id as article_id, "headline.main" as headline, 
+						abstract, lead_paragraph,
 						pub_date, document_type, word_count
 					FROM DeNormalizedNYT
 					WHERE UPPER(name)=="GLOCATIONS"
